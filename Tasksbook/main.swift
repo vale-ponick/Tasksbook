@@ -226,3 +226,62 @@ do {
  ❌ Email without dote '.'
  Program ended with exit code: 0
  */
+
+// MARK: - 🛠 ЧЕТВЕРТАЯ ЗАДАЧА. ПАРСЕР температуры. Напиши функцию - парсер, которая преобразует строку в число: parseTemperature(_ input: String) throws -> Double: Условие    Ошибка. Строка пустая    .emptyInput. Строка содержит буквы (кроме - и .).invalidCharacter. Строка не может быть преобразована в число.notANumber. Температура ниже -273.15 (абсолютный ноль).belowAbsoluteZero. Если всё ок → вернуть Double
+
+enum TemperatureError: Error {
+    case emptyInput // cтрока пустая
+    case notNumber // Строка не м.б. преобразована в число
+    case belowAbsoluteZero // Температура ниже -273.15
+}
+
+func parseTemperature(_ input: String) throws -> Double {
+    guard !input.isEmpty else {
+        throw TemperatureError.emptyInput
+    }
+    guard let value = Double(input) else { // Если в строке есть буквы → Double(input) вернёт nil
+        throw TemperatureError.notNumber
+    }
+    guard value >= -273.15 else {
+        throw TemperatureError.belowAbsoluteZero
+    }
+    return value
+}
+do {
+    let temp = try parseTemperature("25.0")
+    print("✅ \(temp)°C") // ✅ 25.0°C
+} catch TemperatureError.emptyInput {
+    print("❌ Empty input")
+} catch TemperatureError.notNumber {
+    print("❌ Not a number")
+} catch TemperatureError.belowAbsoluteZero {
+    print("❌ Below absolute zero")
+} catch {
+    print("Unexpected error: \(error)")
+}
+
+do {
+    let temp = try parseTemperature("25.a")
+    print("✅ \(temp)°C") // ❌ Not a number
+} catch TemperatureError.emptyInput {
+    print("❌ Empty input")
+} catch TemperatureError.notNumber {
+    print("❌ Not a number")
+} catch TemperatureError.belowAbsoluteZero {
+    print("❌ Below absolute zero")
+} catch {
+    print("Unexpected error: \(error)")
+}
+
+do {
+    let temp = try parseTemperature("-325.0")
+    print("✅ \(temp)°C")
+} catch TemperatureError.emptyInput {
+    print("❌ Empty input")
+} catch TemperatureError.notNumber {
+    print("❌ Not a number")
+} catch TemperatureError.belowAbsoluteZero {
+    print("❌ Below absolute zero") // ❌ Below absolute zero
+} catch {
+    print("Unexpected error: \(error)")
+}
