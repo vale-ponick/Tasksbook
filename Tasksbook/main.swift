@@ -69,7 +69,7 @@ func findIndex(of target: Int, in array: [Int]) throws -> Int {
     guard !array.isEmpty else {
         throw FindError.emptyArray
     }
-    guard let index = array.firstIndex(of: target) else { 
+    guard let index = array.firstIndex(of: target) else {
         throw FindError.notFound
     }
     return index
@@ -81,7 +81,7 @@ print(indexInEmptyArray)
 } catch FindError.emptyArray {
     print("❌ Index of target in empty array is absent")
 } catch {
-    print("Unexpected error: \(error)")
+    print("Unexpected error \(error)")
 }
 
 do {
@@ -101,8 +101,128 @@ print(indexOfTargetInArray)
 } catch {
     print("Unexpected error: \(error)")
 }
+
+
 /*
  ❌ Index of target in empty array is absent
  ❌ Index of target not dound in array
  0
+ */
+
+// MARK: - 🛠 ТРЕТЬЯ ЗАДАЧА 3: ВАЛИДАЦИЯ EMAIL - Иоанна проверяет, можно ли отправить сообщение контакту. Email должен содержать "@" и ".". Напиши функцию validateEmail(_ email: String) throws -> Bool: Если email пустой → .empty. Если нет "@" → .noAtSymbol, если нет "." → .noDot, если всё ок → true
+
+enum EmailError: Error { // подписала под тип Error
+    case empty // email пустой
+    case noAtSymbol // нет "@"
+    case noDot // нет "."
+    case invalidPosition
+    case containsSpaces
+    case consecutiveDot
+}
+
+func validateEmail(_ email: String) throws -> Bool {
+    guard !email.isEmpty else {
+        throw EmailError.empty
+    }
+    
+    guard !email.contains(" ") else {
+        throw EmailError.containsSpaces
+    }
+    
+    guard !email.contains("..") else {
+        throw EmailError.consecutiveDot
+    }
+    guard email.contains("@") else {
+        throw EmailError.noAtSymbol
+    }
+    
+    let parts = email.split(separator: "@")
+    guard parts.count == 2,
+        !parts[0].isEmpty,
+        !parts[1].isEmpty else {
+        throw EmailError.invalidPosition
+    }
+
+    guard let domain = email.split(separator: "@").last, // split == надежно и читаемо
+          domain.contains(".") else { // split(separator: "@").last == разбей строку символом на части + часть строки после символа проверяем на точку? // parts = ["vale.ponick", "gmailcom"]
+        throw EmailError.noDot
+    }
+    print(email)
+    return true
+}
+
+do {
+    let emptyEmail = try validateEmail("vale.ponick@gmail.com")
+    print(emptyEmail)
+} catch EmailError.empty {
+    print("❌ Email is empty!")
+} catch EmailError.containsSpaces {
+    print("❌ Email contains spaces!")
+} catch {
+    print("Unexpected error: \(error)")
+}
+
+do {
+    let emailWithSpaces = try validateEmail("va  le.ponick@gmail.com")
+    print(emailWithSpaces)
+} catch EmailError.containsSpaces {
+    print("❌ Email contains spaces!")
+} catch {
+    print("Unexpected error: \(error)")
+}
+
+do {
+    let emailWithConsecutiveDots = try validateEmail("vale...ponick@gmail.com")
+    print(emailWithConsecutiveDots)
+} catch EmailError.consecutiveDot {
+    print("❌ Email with consecutive dots!")
+} catch EmailError.containsSpaces {
+    print("❌ Email contains spaces!")
+} catch {
+    print("Unexpected error: \(error)")
+}
+
+do {
+    let noDomain = try validateEmail("vale@ponick@gmail.com")
+    print(noDomain)
+} catch EmailError.invalidPosition {
+    print("❌ Domain not found!")
+} catch EmailError.containsSpaces {
+    print("❌ Email contains spaces!")
+} catch {
+    print("Unexpected error: \(error)")
+}
+
+
+do {
+    let emailWithoutSymbol = try validateEmail("vale.ponickgmail.com")
+    print(emailWithoutSymbol)
+} catch EmailError.noAtSymbol {
+    print("❌ Email without symbol '@'")
+} catch EmailError.containsSpaces {
+    print("❌ Email contains spaces!")
+} catch {
+    print("Unexpected error: \(error)")
+}
+
+do {
+    let domainlWithoutDot = try validateEmail("vale.ponick@gmailcom")
+    print(domainlWithoutDot)
+} catch EmailError.noDot {
+    print("❌ Email without dote '.'")
+} catch EmailError.containsSpaces {
+    print("❌ Email contains spaces!")
+} catch {
+    print("Unexpected error: \(error)")
+}
+
+/*
+ vale.ponick@gmail.com
+ true
+ ❌ Email contains spaces!
+ ❌ Email with consecutive dots!
+ ❌ Domain not found!
+ ❌ Email without symbol '@'
+ ❌ Email without dote '.'
+ Program ended with exit code: 0
  */
