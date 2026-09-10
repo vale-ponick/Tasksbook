@@ -295,7 +295,7 @@ do {
 
 enum CurrencyError: Error {
     case invalidAmount // сумма <= 0
-    case unsuppertedCurrency // валюта НЕ поддерживается
+    case unsupportedCurrency // валюта НЕ поддерживается
     case amountTooLarge // сумма слишком велика > 1 000 000
 }
 
@@ -316,15 +316,15 @@ enum Currency: String { // Перечисление со строковым ти
 }
 
 func convertCurrency(amount: Double, to currency: String) throws -> Double {
-    guard amount > 0 else {  // 1. Проверяем валидность суммы
+    guard amount > 0 else {
         throw CurrencyError.invalidAmount
     }
-    let maxAmount = 1000000.0
-    guard amount < maxAmount else { // 2. Проверяем размер суммы
+    let maxAmount = 1_000_000.0
+    guard amount <= maxAmount else { 
         throw CurrencyError.amountTooLarge
     }
     guard let validCurrency = Currency(rawValue: currency.lowercased()) else {
-        throw CurrencyError.unsuppertedCurrency
+        throw CurrencyError.unsupportedCurrency
     }
     
     return amount * validCurrency.rateFromUSD
@@ -333,6 +333,24 @@ func convertCurrency(amount: Double, to currency: String) throws -> Double {
 do {
     let convertEuro = try convertCurrency(amount: 100.0, to: "euro")
     print("✅ Converted summa: \(convertEuro) \(Currency.euro.rawValue.uppercased())") // ✅ Converted summa: 92.0 EURO
-} catch CurrencyError.unsuppertedCurrency {
+} catch CurrencyError.unsupportedCurrency {
     print("❌ unsupperted Currency")
+}
+do {
+    let convertRub = try convertCurrency(amount: 100.0, to: "rub")
+    print("✅ Converted summa: \(convertRub) \(Currency.rub.rawValue.uppercased())") // ✅ Converted summa: 9250.0 RUB
+} catch CurrencyError.unsupportedCurrency {
+    print("❌ unsupperted Currency")
+}
+do {
+    let convertPeso = try convertCurrency(amount: 100.0, to: "Peso")
+    print("✅ Converted summa: \(convertPeso)")
+} catch CurrencyError.unsupportedCurrency {
+    print("❌ unsupperted Currency") // ❌ unsupported Currency
+}
+do {
+    let convertMln = try convertCurrency(amount: 1000000.0, to: "Rub")
+    print("✅ Converted summa: \(convertMln)")
+} catch CurrencyError.amountTooLarge {
+    print("❌ Amount too large") // ❌ Amount too large
 }
