@@ -285,3 +285,54 @@ do {
 } catch {
     print("Unexpected error: \(error)")
 }
+
+// MARK: - 🛠 ТЗ Напиши функцию convertCurrency(amount: Double, to currency: String) throws -> Double:
+/** Условие    Ошибка
+Сумма отрицательная или ноль    .invalidAmount
+Валюта не поддерживается    .unsupportedCurrency
+Сумма слишком большая (> 1 000 000)    .amountTooLarge
+Если всё ок → вернуть сконвертированную сумму */
+
+enum CurrencyError: Error {
+    case invalidAmount // сумма <= 0
+    case unsuppertedCurrency // валюта НЕ поддерживается
+    case amountTooLarge // сумма слишком велика > 1 000 000
+}
+
+enum Currency: String { // Перечисление со строковым типом (Raw-value)
+    case usd
+    case euro
+    case rub
+    case cny
+    
+    var rateFromUSD: Double {
+        switch self {
+        case .usd: return 1.0
+        case .euro: return 0.92 // 1 usd = 0.92 euro
+        case .rub: return 92.5 // 1 usd = 92.5 rub
+        case .cny: return 7.25 // 1 usd = 7.25 cny
+        }
+    }
+}
+
+func convertCurrency(amount: Double, to currency: String) throws -> Double {
+    guard amount > 0 else {  // 1. Проверяем валидность суммы
+        throw CurrencyError.invalidAmount
+    }
+    let maxAmount = 1000000.0
+    guard amount < maxAmount else { // 2. Проверяем размер суммы
+        throw CurrencyError.amountTooLarge
+    }
+    guard let validCurrency = Currency(rawValue: currency.lowercased()) else {
+        throw CurrencyError.unsuppertedCurrency
+    }
+    
+    return amount * validCurrency.rateFromUSD
+}
+
+do {
+    let convertEuro = try convertCurrency(amount: 100.0, to: "euro")
+    print("✅ Converted summa: \(convertEuro) \(Currency.euro.rawValue.uppercased())") // ✅ Converted summa: 92.0 EURO
+} catch CurrencyError.unsuppertedCurrency {
+    print("❌ unsupperted Currency")
+}
