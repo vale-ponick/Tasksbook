@@ -452,3 +452,88 @@ do {
 } catch {
     print("Unexpected error: \(error)")
 }
+
+// MARK: - 📋 TS: Test 8 — 'Parsing a JSON String' (simulation). Joanna receives a fake passport from a friend in Paris. The passport data is stored as a string. It needs to be parsed into a structure, but the data may be incorrect.
+/**
+ 🛠 УСЛОВИЯ
+Формат строки: "name:Marie Guibois;age: 28;citizenship:France"
+
+Условие    Ошибка
+Строка пустая    .emptyInput
+Нет разделителя ;    .invalidFormat
+Нет ключа "name"    .missingName
+Нет ключа "age"    .missingAge
+Возраст не число    .invalidAge
+Если всё ок → вернуть структуру Person */
+
+enum ParseError: Error {
+    case emptyInput
+    case invalidFormat
+    case missingName
+    case missingAge
+    case invalidAge
+    case missingCitizenship
+   
+}
+struct Person {
+    let name: String
+    let age: Int
+    let citizenship: String
+}
+func parsePassport(_ input: String) throws -> Person {
+    guard !input.isEmpty else {
+        throw ParseError.emptyInput
+    }
+    guard input.contains(";") else {
+        throw ParseError.invalidFormat
+    }
+    
+    let parts = input.components(separatedBy: ";").map { $0.trimmingCharacters(in: .whitespaces) }
+    
+    var dict: [String: String] = [:]
+    for part in parts {
+        let keyValue = part.components(separatedBy: ":")
+        if keyValue.count == 2 {
+            let key = keyValue[0].trimmingCharacters(in: .whitespaces)
+            let value = keyValue[1].trimmingCharacters(in: .whitespaces)
+            dict[key] = value
+        }
+    }
+    guard let name = dict["name"], !name.isEmpty else {
+        throw ParseError.missingName
+    }
+    
+    guard let ageString = dict["age"] else {
+        throw ParseError.missingAge
+    }
+            
+    guard let age = Int(ageString) else {
+        throw ParseError.invalidAge
+    }
+    
+    guard let citizenship = dict["citizenship"], !citizenship.isEmpty else {
+        throw ParseError.missingCitizenship
+    }
+
+    return Person(name: name, age: age, citizenship: citizenship)
+}
+
+// MARK: - ПРОВЕРКА (теперь строка ровно как в условии — с пробелом "age: 28")
+do {
+    let person = try parsePassport("name:Marie Guibois;age: 28;citizenship:France")
+    print("✅ \(person)") // ✅ Person(name: "Marie Guibois", age: 28, citizenship: "France")
+} catch ParseError.emptyInput {
+    print("❌ Empty input")
+} catch ParseError.invalidFormat {
+    print("❌ Invalid format")
+} catch ParseError.missingName {
+    print("❌ Missing name")
+} catch ParseError.missingAge {
+    print("❌ Missing age")
+} catch ParseError.invalidAge {
+    print("❌ Invalid age")
+} catch ParseError.missingCitizenship {
+    print("❌ Missing citizenship")
+} catch {
+    print("Unexpected error: \(error)")
+}
