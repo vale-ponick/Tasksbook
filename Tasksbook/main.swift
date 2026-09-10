@@ -320,7 +320,7 @@ func convertCurrency(amount: Double, to currency: String) throws -> Double {
         throw CurrencyError.invalidAmount
     }
     let maxAmount = 1_000_000.0
-    guard amount <= maxAmount else { 
+    guard amount <= maxAmount else {
         throw CurrencyError.amountTooLarge
     }
     guard let validCurrency = Currency(rawValue: currency.lowercased()) else {
@@ -353,4 +353,102 @@ do {
     print("✅ Converted summa: \(convertMln)")
 } catch CurrencyError.amountTooLarge {
     print("❌ Amount too large") // ❌ Amount too large
+}
+
+// MARK: - 🔄 PIPELINE LEARN SWIFT
+// 📋 TS → 📝 Scheme-text → 🗺️ Scheme-block → 💻 Code → 🧪 Tests → 🔍 Revue → 📓 Reflex
+
+// MARK: - 📋 TS: Task 6 — 'Age Check': Joanna checks whether the user can log in. The age must be within the acceptable range'
+/**
+🛠 УСЛОВИЯ
+Условие    Ошибка
+Возраст отрицательный    .negativeAge
+Возраст больше 120    .tooOld
+Возраст меньше 18    .tooYoung
+Если всё ок → вернуть "Доступ разрешён" */
+
+enum AgeError: Error {
+    case negativeAge
+    case tooYoung
+    case tooOld
+}
+
+func check(_ age: Int) throws -> Int {
+    guard age > 0 else {
+        throw AgeError.negativeAge
+    }
+    guard age >= 18 else {
+        throw AgeError.tooYoung
+    }
+    guard age <= 121 else {
+        throw AgeError.tooOld
+    }
+    return age
+}
+do {
+    let result = try check(131)
+    print("✅ \(result) → Доступ разрешён")
+} catch AgeError.tooOld {
+    print("❌ Too old") // ❌ Too old
+} catch AgeError.negativeAge {
+    print("❌ Negative age")
+} catch AgeError.tooYoung {
+    print("❌ Too young")
+} catch {
+    print("Unexpected error: \(error)")
+}
+
+// MARK: - 🔄 PIPELINE LEARN SWIFT
+// 📋 TS → 📝 Scheme-text → 🗺️ Scheme-block → 💻 Code → 🧪 Tests → 🔍 Revue → 📓 Reflex
+// MARK: - 📋 TS: Test 7 — 'Bank transfer': Иоанна переводит деньги со счёта на счёт. Перевод может провалиться по нескольким причинам.
+/**
+ 🛠 CONDITIONS
+Condition Error
+Transfer amount <= 0 .invalidAmount
+Insufficient funds in the account .insufficientFunds
+Transfer amount > 50,000 .limitExceeded
+Recipient account matches sender account .sameAccount
+If everything is OK → return "Transfer completed" */
+
+enum ConditionError: Error {
+    case invalidAmount // перевод <= 0
+    case insufficientFunds // недостаточно средств на счете
+    case limitExceeded // перевод Ю 50.000
+    case sameAccount // перевод самому себе
+}
+struct Account {
+    let id: Double
+    let balance: Double
+}
+func transfer(_ amount: Double, from sender: Account, to receiver: Account) throws -> String {
+    guard amount > 0 else {
+        throw ConditionError.invalidAmount
+    }
+    guard sender.id != receiver.id else {
+        throw ConditionError.sameAccount
+    }
+    guard sender.balance >= amount else {
+        throw ConditionError.insufficientFunds
+    }
+    guard amount <= 50_000 else {
+        throw ConditionError.limitExceeded
+    }
+    return "Transfer completed"
+}
+let sender = Account(id: 1, balance: 1000)
+let receiver = Account(id: 2, balance: 500)
+
+do {
+    let result = try transfer(100, from: sender, to: receiver)
+    print("✅ \(result)") // ✅ Transfer completed
+} catch ConditionError.invalidAmount {
+    print("❌ Invalid amount")
+} catch ConditionError.sameAccount {
+    print("❌ Same account")
+} catch ConditionError.insufficientFunds {
+    print("❌ Insufficient funds")
+} catch ConditionError.limitExceeded {
+    print("❌ Limit exceeded")
+} catch {
+    print("Unexpected error: \(error)")
 }
