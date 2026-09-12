@@ -537,3 +537,119 @@ do {
 } catch {
     print("Unexpected error: \(error)")
 }
+
+// MARK: - 🔄 PIPELINE LEARN SWIFT
+// 📋 TS → 📝 Scheme-text → 🗺️ Scheme-block → 💻 Code → 🧪 Tests → 🔍 Revue → 📓 Reflex
+
+// MARK: - 📋 TS: Test 9 — 'Bank transfer PRO': Joanna transfers money from one account to another. She has several accounts, and everything needs to be checked: the amount, the currency, the status, the limits.
+/**
+ 🛠 CONDITIONS
+ Условие    Ошибка
+ Сумма перевода <= 0    .invalidAmount
+ Счёт отправителя заблокирован    .accountBlocked
+ Счёт получателя заблокирован    .receiverBlocked
+ Валюты счетов не совпадают    .currencyMismatch
+ Недостаточно средств    .insufficientFunds
+ Превышен дневной лимит    .dailyLimitExceeded
+ Если всё ок → "Перевод выполнен"    */
+
+enum TransferError: Error {
+    case invalidAccount // счет НЕ найден
+    case invalidAmount// суммма перевода <= 0
+    case accountBlocked // счет ОТПРАВИЛЕЛЯ заблокирован
+    case receiverBlocked //счет ПОЛУЧАТЕЛЯ заблокирован
+    case currencyMismatch // валюты НЕ совпадают
+    case insufficientFunds // недостаточно средств на счете
+    case dailyLimitExceeded // превышен дневной лимит
+}
+
+enum AccountStatus {
+    case active
+    case blocked
+}
+
+enum CurrencyType: String {
+    case usd
+    case dkk
+    case pln
+}
+
+struct Wallet {
+    let amount: Double
+    let status: AccountStatus
+    let type: CurrencyType
+    let limit: Double
+}
+let wallets: [Int: Wallet] = [
+    1: Wallet(amount: 500.0, status: .active, type: .usd, limit: 50_000),
+    2: Wallet(amount: 12100.5, status: .active, type: .dkk, limit: 50_000),
+    3: Wallet(amount: 33_033.3, status: .active, type: .pln, limit: 50_000),
+    4: Wallet(amount: 300.0, status: .blocked, type: .dkk, limit: 50_000),
+    5: Wallet(amount: 8000.0, status: .active, type: .usd, limit: 50_000)
+]
+func transfer(_ amount: Double, from senderID: Int, to receiverID: Int, wallets: [Int: Wallet]) throws -> String {
+    guard amount > 0 else {
+        throw TransferError.invalidAmount
+    }
+    guard let sender = wallets[senderID] else {
+        throw TransferError.invalidAccount
+    }
+    
+    guard sender.status != .blocked else {
+        throw TransferError.accountBlocked
+    }
+    guard let receiver = wallets[receiverID] else {
+        throw TransferError.invalidAccount
+    }
+    
+    guard receiver.status != .blocked else {
+        throw TransferError.receiverBlocked
+    }
+    guard sender.type == receiver.type else {
+        throw TransferError.currencyMismatch
+    }
+    guard sender.amount >= amount else {
+        throw TransferError.insufficientFunds
+    }
+    guard amount <= sender.limit else {
+        throw TransferError.dailyLimitExceeded
+    }
+    return "Transfer completed"
+}
+do {
+    let result = try transfer(100, from: 1, to: 5, wallets: wallets)
+    print("✅ \(result)") // ✅ Transfer completed
+} catch TransferError.invalidAmount {
+    print("❌ Invalid amount")
+} catch TransferError.accountBlocked {
+    print("❌ Account blocked")
+} catch TransferError.receiverBlocked {
+    print("❌ Receiver blocked")
+} catch TransferError.currencyMismatch {
+    print("❌ Currency mismatch")
+} catch TransferError.insufficientFunds {
+    print("❌ Insufficient funds")
+} catch TransferError.dailyLimitExceeded {
+    print("❌ Daily limit exceeded")
+} catch {
+    print("Unexpected error: \(error)")
+}
+
+do {
+    let result = try transfer(100, from: 2, to: 4, wallets: wallets)
+    print("✅ \(result)") // ✅ Transfer completed
+} catch TransferError.invalidAmount {
+    print("❌ Invalid amount")
+} catch TransferError.accountBlocked {
+    print("❌ Account blocked")
+} catch TransferError.receiverBlocked {
+    print("❌ Receiver blocked") // ❌ Receiver blocked
+} catch TransferError.currencyMismatch {
+    print("❌ Currency mismatch")
+} catch TransferError.insufficientFunds {
+    print("❌ Insufficient funds")
+} catch TransferError.dailyLimitExceeded {
+    print("❌ Daily limit exceeded")
+} catch {
+    print("Unexpected error: \(error)")
+}
