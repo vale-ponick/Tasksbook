@@ -7,7 +7,7 @@
 
 import Foundation
 
-// MARK: - '🛠 ПЕРВАЯ ЗАДАЧА (НА ФУНКЦИЮ)'
+// MARK: - '🛠 ЗАДАЧА 1. (НА ФУНКЦИЮ)'
 /*
 Напиши функцию `divide(_:by:) throws -> Double`:
 - Если делитель == 0 → выбросить ошибку `.divisionByZero`
@@ -49,7 +49,7 @@ do {
  Program ended with exit code: 0
  */
 
-/** MARK: - '🛠 ВТОРАЯ ЗАДАЧА (НА ФУНКЦИЮ)': Напиши функцию findIndex(of target: Int, in array: [Int]) throws -> Int`:
+/** MARK: - '🛠 ЗАДАЧА 2. (НА ФУНКЦИЮ)': Напиши функцию findIndex(of target: Int, in array: [Int]) throws -> Int`:
 - Если массив пуст → ошибка `.emptyArray`
 - Если элемент не найден → ошибка `.notFound`
 - Иначе → вернуть индекс
@@ -109,7 +109,7 @@ print(indexOfTargetInArray)
  0
  */
 
-// MARK: - 🛠 ТРЕТЬЯ ЗАДАЧА 3: ВАЛИДАЦИЯ EMAIL - Иоанна проверяет, можно ли отправить сообщение контакту. Email должен содержать "@" и ".". Напиши функцию validateEmail(_ email: String) throws -> Bool: Если email пустой → .empty. Если нет "@" → .noAtSymbol, если нет "." → .noDot, если всё ок → true
+// MARK: - 🛠 ЗАДАЧА 3: ВАЛИДАЦИЯ EMAIL - Иоанна проверяет, можно ли отправить сообщение контакту. Email должен содержать "@" и ".". Напиши функцию validateEmail(_ email: String) throws -> Bool: Если email пустой → .empty. Если нет "@" → .noAtSymbol, если нет "." → .noDot, если всё ок → true
 
 enum EmailError: Error { // подписала под тип Error
     case empty // email пустой
@@ -227,7 +227,7 @@ do {
  Program ended with exit code: 0
  */
 
-// MARK: - 🛠 ЧЕТВЕРТАЯ ЗАДАЧА. ПАРСЕР температуры. Напиши функцию - парсер, которая преобразует строку в число: parseTemperature(_ input: String) throws -> Double: Условие    Ошибка. Строка пустая    .emptyInput. Строка содержит буквы (кроме - и .).invalidCharacter. Строка не может быть преобразована в число.notANumber. Температура ниже -273.15 (абсолютный ноль).belowAbsoluteZero. Если всё ок → вернуть Double
+// MARK: - 🛠 ЗАДАЧА 4. ПАРСЕР температуры. Напиши функцию - парсер, которая преобразует строку в число: parseTemperature(_ input: String) throws -> Double: Условие    Ошибка. Строка пустая    .emptyInput. Строка содержит буквы (кроме - и .).invalidCharacter. Строка не может быть преобразована в число.notANumber. Температура ниже -273.15 (абсолютный ноль).belowAbsoluteZero. Если всё ок → вернуть Double
 
 enum TemperatureError: Error {
     case emptyInput // cтрока пустая
@@ -286,7 +286,7 @@ do {
     print("Unexpected error: \(error)")
 }
 
-// MARK: - 🛠 ТЗ Напиши функцию convertCurrency(amount: Double, to currency: String) throws -> Double:
+// MARK: - 🛠 Задача 5. Напиши функцию convertCurrency(amount: Double, to currency: String) throws -> Double:
 /** Условие    Ошибка
 Сумма отрицательная или ноль    .invalidAmount
 Валюта не поддерживается    .unsupportedCurrency
@@ -358,7 +358,7 @@ do {
 // MARK: - 🔄 PIPELINE LEARN SWIFT
 // 📋 TS → 📝 Scheme-text → 🗺️ Scheme-block → 💻 Code → 🧪 Tests → 🔍 Revue → 📓 Reflex
 
-// MARK: - 📋 TS: Task 6 — 'Age Check': Joanna checks whether the user can log in. The age must be within the acceptable range'
+// MARK: - 📋 Задача 6. 'Age Check': Joanna checks whether the user can log in. The age must be within the acceptable range'
 /**
 🛠 УСЛОВИЯ
 Условие    Ошибка
@@ -400,7 +400,7 @@ do {
 
 // MARK: - 🔄 PIPELINE LEARN SWIFT
 // 📋 TS → 📝 Scheme-text → 🗺️ Scheme-block → 💻 Code → 🧪 Tests → 🔍 Revue → 📓 Reflex
-// MARK: - 📋 TS: Test 7 — 'Bank transfer': Иоанна переводит деньги со счёта на счёт. Перевод может провалиться по нескольким причинам.
+// MARK: - 📋 Задача 7. 'Bank transfer': Иоанна переводит деньги со счёта на счёт. Перевод может провалиться по нескольким причинам.
 /**
  🛠 CONDITIONS
 Condition Error
@@ -453,7 +453,7 @@ do {
     print("Unexpected error: \(error)")
 }
 
-// MARK: - 📋 TS: Test 8 — 'Parsing a JSON String' (simulation). Joanna receives a fake passport from a friend in Paris. The passport data is stored as a string. It needs to be parsed into a structure, but the data may be incorrect.
+// MARK: - 📋 Задача 8. 'Parsing a JSON String' (simulation). Joanna receives a fake passport from a friend in Paris. The passport data is stored as a string. It needs to be parsed into a structure, but the data may be incorrect.
 /**
  🛠 УСЛОВИЯ
 Формат строки: "name:Marie Guibois;age: 28;citizenship:France"
@@ -541,7 +541,7 @@ do {
 // MARK: - 🔄 PIPELINE LEARN SWIFT
 // 📋 TS → 📝 Scheme-text → 🗺️ Scheme-block → 💻 Code → 🧪 Tests → 🔍 Revue → 📓 Reflex
 
-// MARK: - 📋 TS: Test 9 — 'Bank transfer PRO': Joanna transfers money from one account to another. She has several accounts, and everything needs to be checked: the amount, the currency, the status, the limits.
+// MARK: - 📋 Задача 9. 'Bank transfer PRO': Joanna transfers money from one account to another. She has several accounts, and everything needs to be checked: the amount, the currency, the status, the limits.
 /**
  🛠 CONDITIONS
  Условие    Ошибка
@@ -653,3 +653,118 @@ do {
 } catch {
     print("Unexpected error: \(error)")
 }
+
+// MARK: - 📋 ЗАДАЧА 10. — 'Composite check: Custom inspection' - Joanna goes through customs control: passport, visa, and luggage. Each check can fail for its own reason.
+
+// 🔄 📋 ТЗ → 📝 Схема-текст → 🗺️ Схема-блок → 💻 Код → 🧪 Тесты → 🔍 Ревью → 📓 Рефлексия
+
+enum CustomsError: Error {
+    case wantedByInterpol
+    case fakePassport
+    case noVisa
+    case expiredVisa
+    case overweightBaggage
+}
+struct Visa {
+    let issued: Bool // действующая виза
+    let expired: Bool // истекшая виза
+}
+    
+struct Passport {
+    let name: String
+    let citizenship: String
+    let visaGranted: Visa?
+    let isFake: Bool
+   
+}
+struct Baggage {
+    let weight: Double
+    let limit: Double
+}
+struct Traveler {
+    let name: String
+    let passport: Passport // виза внутри passport.visaGranted
+    let baggage: Baggage
+}
+
+let wantedList: Set<String> = ["Marie Guibois", "John Doe"]
+
+func inspection(_ travelers: Traveler, wanted: Set<String>) throws -> String {
+    guard !wanted.contains(travelers.name) else {
+        throw CustomsError.wantedByInterpol
+    }
+    
+    guard !travelers.passport.isFake else {
+        throw CustomsError.fakePassport
+    }
+    
+    guard let visa = travelers.passport.visaGranted else {
+        throw CustomsError.noVisa
+    }
+    
+    guard !visa.expired else {
+        throw CustomsError.expiredVisa
+    }
+    guard travelers.baggage.weight <= travelers.baggage.limit else {
+        throw CustomsError.overweightBaggage
+    }
+    return "Castom complete. Welcome, hotel 'Taormina'!"
+}
+do {
+    let joanna = Traveler(
+        name: "Joanna",
+        passport: Passport(
+            name: "Joanna",
+            citizenship: "PR",
+            visaGranted: Visa(issued: true, expired: false),
+            isFake: false
+        ),
+        baggage: Baggage(
+            weight: 12.2, limit: 21.0)
+        )
+        
+        let result = try inspection(joanna, wanted: wantedList)
+        print("✅ \(result)") // ✅ Castom complete. Welcome, hotel 'Taormina'!
+} catch CustomsError.wantedByInterpol {
+        print("❌ Wanted by Interpol")
+    } catch CustomsError.fakePassport {
+        print("❌ Fake passport")
+    } catch CustomsError.noVisa {
+        print("❌ No visa")
+    } catch CustomsError.expiredVisa {
+        print("❌ Expired visa")
+    } catch CustomsError.overweightBaggage {
+        print("❌ Overweight baggage")
+    } catch {
+        print("Unexpected error: \(error)")
+}
+
+do {
+    let marie = Traveler(
+        name: "Marie Guibois",
+        passport: Passport(
+            name: "Marie Guibois",
+            citizenship: "France",
+            visaGranted: Visa(issued: true, expired: false),
+            isFake: false
+        ),
+        baggage: Baggage(
+            weight: 7.5, limit: 21.0)
+        )
+        
+        let result = try inspection(marie, wanted: wantedList)
+        print("✅ \(result)")
+} catch CustomsError.wantedByInterpol {
+        print("❌ Wanted by Interpol") // ❌ Wanted by Interpol
+    } catch CustomsError.fakePassport {
+        print("❌ Fake passport")
+    } catch CustomsError.noVisa {
+        print("❌ No visa")
+    } catch CustomsError.expiredVisa {
+        print("❌ Expired visa")
+    } catch CustomsError.overweightBaggage {
+        print("❌ Overweight baggage")
+    } catch {
+        print("Unexpected error: \(error)")
+}
+
