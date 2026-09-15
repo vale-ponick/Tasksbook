@@ -658,16 +658,30 @@ do {
 
 // 🔄 📋 ТЗ → 📝 Схема-текст → 🗺️ Схема-блок → 💻 Код → 🧪 Тесты → 🔍 Ревью → 📓 Рефлексия
 
-enum CustomsError: Error {
+// MARK: - Модели данных
+enum CustomsError: Error, CustomStringConvertible {
     case wantedByInterpol
     case fakePassport
     case noVisa
     case expiredVisa
     case overweightBaggage
+    case multipleErrors([CustomsError])
+    
+    var description: String {
+        switch self {
+        case .wantedByInterpol: return "Wanted by Interpol"
+        case .fakePassport:     return "Fake passport"
+        case .noVisa:           return "No visa"
+        case .expiredVisa:      return "Expired visa"
+        case .overweightBaggage: return "Overweight baggage"
+        case .multipleErrors(let subErrors): return "Multiple errors: " + subErrors.map { $0.description }.joined(separator: ", ")
+        }
+    }
 }
+
 struct Visa {
-    let issued: Bool // действующая виза
-    let expired: Bool // истекшая виза
+    let issued: Bool
+    let expired: Bool
 }
     
 struct Passport {
@@ -675,96 +689,102 @@ struct Passport {
     let citizenship: String
     let visaGranted: Visa?
     let isFake: Bool
-   
 }
+
 struct Baggage {
     let weight: Double
     let limit: Double
 }
+
 struct Traveler {
     let name: String
-    let passport: Passport // виза внутри passport.visaGranted
+    let passport: Passport
     let baggage: Baggage
 }
 
-let wantedList: Set<String> = ["Marie Guibois", "John Doe"]
+// MARK: - Логика контроля
 
-func inspection(_ travelers: Traveler, wanted: Set<String>) throws -> String {
-    guard !wanted.contains(travelers.name) else {
-        throw CustomsError.wantedByInterpol
+func fullInspection(_ traveler: Traveler, wanted: Set<String>) throws -> String {
+    
+    var foundErrors: [CustomsError] = [] // 1. Создаем локальный массив ТОЛЬКО для этого пассажира
+    
+    if wanted.contains(traveler.name) {
+        foundErrors.append(.wantedByInterpol)
+    }
+    if traveler.passport.isFake {
+        foundErrors.append(.fakePassport)
     }
     
-    guard !travelers.passport.isFake else {
-        throw CustomsError.fakePassport
+    if let visa = traveler.passport.visaGranted {
+        if  visa.expired {
+            foundErrors.append(.expiredVisa)
+        }
+    } else {
+        foundErrors.append(.noVisa)
     }
     
-    guard let visa = travelers.passport.visaGranted else {
-        throw CustomsError.noVisa
+    if traveler.baggage.weight > traveler.baggage.limit {
+        foundErrors.append(.overweightBaggage)
     }
-    
-    guard !visa.expired else {
-        throw CustomsError.expiredVisa
+    guard foundErrors.isEmpty else {
+        throw CustomsError.multipleErrors(foundErrors)
     }
-    guard travelers.baggage.weight <= travelers.baggage.limit else {
-        throw CustomsError.overweightBaggage
-    }
-    return "Castom complete. Welcome, hotel 'Taormina'!"
+    return "Customs complete. Welcome to hotel 'Taormina'!"
 }
+
+// MARK: - Проверка
+let wantedList: Set<String> = ["Marie Guibois", "John Doe", "Chief - head of gangsters"]
+
+// 1. Тест: Джоанна (Успех)
 do {
     let joanna = Traveler(
         name: "Joanna",
-        passport: Passport(
-            name: "Joanna",
-            citizenship: "PR",
-            visaGranted: Visa(issued: true, expired: false),
-            isFake: false
-        ),
-        baggage: Baggage(
-            weight: 12.2, limit: 21.0)
-        )
-        
-        let result = try inspection(joanna, wanted: wantedList)
-        print("✅ \(result)") // ✅ Castom complete. Welcome, hotel 'Taormina'!
-} catch CustomsError.wantedByInterpol {
-        print("❌ Wanted by Interpol")
-    } catch CustomsError.fakePassport {
-        print("❌ Fake passport")
-    } catch CustomsError.noVisa {
-        print("❌ No visa")
-    } catch CustomsError.expiredVisa {
-        print("❌ Expired visa")
-    } catch CustomsError.overweightBaggage {
-        print("❌ Overweight baggage")
-    } catch {
-        print("Unexpected error: \(error)")
+        passport: Passport(name: "Joanna", citizenship: "PR", visaGranted: Visa(issued: true, expired: false), isFake: false),
+        baggage: Baggage(weight: 12.2, limit: 21.0)
+    )
+    let result = try fullInspection(joanna, wanted: wantedList)
+    print("✅ \(result)")
+} catch {
+    print("❌ \(error)")
 }
 
+// 2. Тест: Мари (Интерпол)
 do {
     let marie = Traveler(
         name: "Marie Guibois",
-        passport: Passport(
-            name: "Marie Guibois",
-            citizenship: "France",
-            visaGranted: Visa(issued: true, expired: false),
-            isFake: false
-        ),
-        baggage: Baggage(
-            weight: 7.5, limit: 21.0)
-        )
-        
-        let result = try inspection(marie, wanted: wantedList)
-        print("✅ \(result)")
-} catch CustomsError.wantedByInterpol {
-        print("❌ Wanted by Interpol") // ❌ Wanted by Interpol
-    } catch CustomsError.fakePassport {
-        print("❌ Fake passport")
-    } catch CustomsError.noVisa {
-        print("❌ No visa")
-    } catch CustomsError.expiredVisa {
-        print("❌ Expired visa")
-    } catch CustomsError.overweightBaggage {
-        print("❌ Overweight baggage")
-    } catch {
-        print("Unexpected error: \(error)")
+        passport: Passport(name: "Marie Guibois", citizenship: "France", visaGranted: Visa(issued: true, expired: false), isFake: false),
+        baggage: Baggage(weight: 7.5, limit: 21.0)
+    )
+    let result = try fullInspection(marie, wanted: wantedList)
+    print("✅ \(result)")
+} catch {
+    print("❌ \(error)") // ❌ Multiple errors: Wanted by Interpol
 }
 
+let chief = Traveler(
+    name: "Chief - head of gangsters",
+    passport: Passport(
+        name: "Chief - head of gangsters",
+        citizenship: "Unknown",
+        visaGranted: Visa(issued: true, expired: true), // Виза просрочена!
+        isFake: true // Паспорт поддельный!
+    ),
+    baggage: Baggage(
+        weight: 66.6, limit: 21.0
+    )
+)
+print("--- Test: Detaining the Chief at Customs ---")
+do {
+    let result = try fullInspection(chief, wanted: wantedList)
+    print("✅ \(result)")
+} catch {
+    print("❌ \(error)") // ❌ Multiple errors: Wanted by Interpol, Fake passport, Expired visa, Overweight baggage
+    
+}
+
+/*
+ ✅ Customs complete. Welcome to hotel 'Taormina'!
+ ❌ Multiple errors: Wanted by Interpol
+ --- Test: Detaining the Chief at Customs ---
+ ❌ Multiple errors: Wanted by Interpol, Fake passport, Expired visa, Overweight baggage
+ */
