@@ -910,15 +910,20 @@ func buySuitcaseAndTransform(joanna: JoannaSigns, ticket: Ticket, events: [Story
 // 🛠 ГЛАВНАЯ ФУНКЦИЯ КООРДИНАТОР
 
 func escapeToParis(joanna: JoannaSigns, ticketToTours: Ticket, ticketToParis: Ticket, events: [StoryEvent]) throws -> String {
-    var currentJoanna = joanna
     
-    currentJoanna = try boardMorningTrain(joanna: currentJoanna, ticket: ticketToTours, events: events)
-    currentJoanna = try replaceSweater(joanna: currentJoanna, events: events)
-    currentJoanna = try replacePants(joanna: currentJoanna, events: events)
-    currentJoanna = try buyShoesBlindly(joanna: currentJoanna, events: events)
+    // Превращаем функции в массив замыканий (шагов конвейера)
+    let pipeline: [(JoannaSigns) throws -> JoannaSigns] = [
+        { try boardMorningTrain(joanna: $0, ticket: ticketToTours, events: events) },
+        { try replaceSweater(joanna: $0, events: events) },
+        { try replacePants(joanna: $0, events: events) },
+        { try buyShoesBlindly(joanna: $0, events: events) },
+        { try buySuitcaseAndTransform(joanna: $0, ticket: ticketToParis, events: events) }
+    ]
     
-    // Передаем второй билет на финальную трансформацию перед посадкой
-    currentJoanna = try buySuitcaseAndTransform(joanna: currentJoanna, ticket: ticketToParis, events: events)
+    // Запускаем конвейер: передаем результат одного шага на вход следующему
+    _ = try pipeline.reduce(joanna) { currentResult, nextStep in
+        try nextStep(currentResult)
+    }
     
     return "Joanna in Paris! Escape was successful! 🎉"
 }
