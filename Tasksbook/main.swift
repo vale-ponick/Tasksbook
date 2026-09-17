@@ -788,3 +788,230 @@ do {
  --- Test: Detaining the Chief at Customs ---
  ❌ Multiple errors: Wanted by Interpol, Fake passport, Expired visa, Overweight baggage
  */
+
+// 🔄 Pipeline: 📋 ТЗ → 📝 Схема-текст → 🗺️ Схема-блок → 💻 Код → 🧪 Тесты → 🔍 Ревью → 📓 Рефлексия
+
+// MARK: - 📋 Task 11. 'Joanna's Escape' (Chain of Functions). Joanna escapes from the dungeon. She looks like an emaciated old woman in baggy, oversized men's clothes. To escape to Paris, she undergoes five stages of transformation. Each stage is a separate function that can throw an error. The result of each stage is passed on to the next.
+
+// 🧩 1. ENUM FOR TYPES
+enum Gender {
+    case male
+    case female
+    case unknown
+}
+
+enum SearchLocation {
+    case morningTrain
+    case stationRestaurant
+    case shoppingMall
+}
+
+enum StoryEvent {
+    case trainDeparted
+    case gangstersNotified
+    case witnessReported
+    case crowdIsEmpty
+    case ticketInvalid
+}
+
+// 🧩 2. STRUCT FOR DATA
+struct Ticket {
+    let number: String
+    let isValid: Bool
+}
+
+struct JoannaSigns {
+    var look: [String]
+    var appearance: String
+    var suitcase: Bool
+    var gender: Gender
+}
+
+// 🧩 3. ERROR:
+enum EscapeError: Error {
+    case reportedToGangsters(location: SearchLocation, reason: String)
+    case noCrowdToBlendIn
+    case trainMissed
+}
+
+// ==========================================
+// 🛠 РЕФАКТОРИНГ: ОБЩИЙ ВАЛИДАТОР ДЛЯ МАГАЗИНОВ
+// ==========================================
+func validateStoreEnvironment(events: [StoryEvent]) throws {
+    guard !events.contains(.crowdIsEmpty) else {
+        throw EscapeError.noCrowdToBlendIn
+    }
+    if events.contains(.witnessReported) {
+        throw EscapeError.reportedToGangsters(
+            location: .shoppingMall,
+            reason: "Witness reported the suspect in the store"
+        )
+    }
+}
+
+// ==========================================
+// 🛠 ЦЕПОЧКА ФУНКЦИЙ (БЕЗ ДУБЛИРОВАНИЯ КОДА)
+// ==========================================
+
+func boardMorningTrain(joanna: JoannaSigns, ticket: Ticket, events: [StoryEvent]) throws -> JoannaSigns {
+    guard ticket.isValid else {
+        throw EscapeError.trainMissed
+    }
+    if events.contains(.gangstersNotified) {
+        print("🚂 Постфактум: Свидетель сообщил гангстерам, что похожий труп ехал в Туp.")
+    }
+    return joanna
+}
+
+func replaceSweater(joanna: JoannaSigns, events: [StoryEvent]) throws -> JoannaSigns {
+    try validateStoreEnvironment(events: events) // Дубликат убран
+    
+    var updatedJoanna = joanna
+    updatedJoanna.look.removeAll { $0 == "men's thick sports oversized sweater" }
+    updatedJoanna.look.append("silk blouse")
+    return updatedJoanna
+}
+
+func replacePants(joanna: JoannaSigns, events: [StoryEvent]) throws -> JoannaSigns {
+    try validateStoreEnvironment(events: events) // Дубликат убран
+    
+    var updatedJoanna = joanna
+    updatedJoanna.look.removeAll { $0 == "men's large-sized jeans" }
+    updatedJoanna.look.append("elegant skirt")
+    return updatedJoanna
+}
+
+func buyShoesBlindly(joanna: JoannaSigns, events: [StoryEvent]) throws -> JoannaSigns {
+    try validateStoreEnvironment(events: events) // Дубликат убран
+    
+    var updatedJoanna = joanna
+    let itemsToRemove = ["men's large-sized sneakers", "men's socks"]
+    updatedJoanna.look.removeAll { itemsToRemove.contains($0) }
+    updatedJoanna.look.append("elegant shoes")
+    return updatedJoanna
+}
+
+func buySuitcaseAndTransform(joanna: JoannaSigns, ticket: Ticket, events: [StoryEvent]) throws -> JoannaSigns {
+    // 1. Проверяем билет в Париж
+    guard ticket.isValid else {
+        throw EscapeError.trainMissed
+    }
+    // 2. Проверяем обстановку в магазине через валидатор
+    try validateStoreEnvironment(events: events)
+    
+    var updatedJoanna = joanna
+    updatedJoanna.look.removeAll { $0 == "oversized sunglasses" }
+    updatedJoanna.look.append("new elegant sunglasses")
+    updatedJoanna.appearance = "elegant woman"
+    updatedJoanna.gender = .female
+    updatedJoanna.suitcase = true
+    return updatedJoanna
+}
+// 🛠 ГЛАВНАЯ ФУНКЦИЯ КООРДИНАТОР
+
+func escapeToParis(joanna: JoannaSigns, ticketToTours: Ticket, ticketToParis: Ticket, events: [StoryEvent]) throws -> String {
+    var currentJoanna = joanna
+    
+    currentJoanna = try boardMorningTrain(joanna: currentJoanna, ticket: ticketToTours, events: events)
+    currentJoanna = try replaceSweater(joanna: currentJoanna, events: events)
+    currentJoanna = try replacePants(joanna: currentJoanna, events: events)
+    currentJoanna = try buyShoesBlindly(joanna: currentJoanna, events: events)
+    
+    // Передаем второй билет на финальную трансформацию перед посадкой
+    currentJoanna = try buySuitcaseAndTransform(joanna: currentJoanna, ticket: ticketToParis, events: events)
+    
+    return "Joanna in Paris! Escape was successful! 🎉"
+}
+
+let initialJoanna = JoannaSigns(
+    look: [
+        "men's thick sports oversized sweater",
+        "men's large-sized jeans",
+        "men's large-sized sneakers",
+        "men's socks",
+        "oversized sunglasses"
+    ],
+    appearance: "a similar corpse, vaguely resembling a woman",
+    suitcase: false,
+    gender: .unknown
+)
+// Тест 1: успех
+do {
+    let result = try escapeToParis(
+        joanna: initialJoanna,
+        ticketToTours: Ticket(number: "T1", isValid: true),
+        ticketToParis: Ticket(number: "T2", isValid: true),
+        events: []
+    )
+    print("✅ \(result)")
+} catch {
+    print("❌ \(error)")
+}
+
+// Тест 2: пустая толпа
+do {
+    let result = try escapeToParis(
+        joanna: initialJoanna,
+        ticketToTours: Ticket(number: "T1", isValid: true),
+        ticketToParis: Ticket(number: "T2", isValid: true),
+        events: [.crowdIsEmpty]
+    )
+    print("✅ \(result)")
+} catch EscapeError.noCrowdToBlendIn {
+    print("❌ No crowd to blend in")
+} catch {
+    print("❌ Unexpected error: \(error)")
+}
+
+// Тест 3: свидетель
+do {
+    let result = try escapeToParis(
+        joanna: initialJoanna,
+        ticketToTours: Ticket(number: "T1", isValid: true),
+        ticketToParis: Ticket(number: "T2", isValid: true),
+        events: [.witnessReported]
+    )
+    print("✅ \(result)")
+} catch EscapeError.reportedToGangsters {
+    print("❌ Witness reported the suspect")
+} catch {
+    print("❌ Unexpected error: \(error)")
+}
+
+// Тест 4: невалидный билет
+do {
+    let result = try escapeToParis(
+        joanna: initialJoanna,
+        ticketToTours: Ticket(number: "T1", isValid: false),
+        ticketToParis: Ticket(number: "T2", isValid: true),
+        events: []
+    )
+    print("✅ \(result)")
+} catch EscapeError.trainMissed {
+    print("❌ Train missed")
+} catch {
+    print("❌ Unexpected error: \(error)")
+}
+// Тест 5: Билет до Тура ок, но билет в Париж испорчен
+do {
+    let result = try escapeToParis(
+        joanna: initialJoanna,
+        ticketToTours: Ticket(number: "T1", isValid: true),
+        ticketToParis: Ticket(number: "T2-FAKE", isValid: false), // Испорчен
+        events: []
+    )
+    print("✅ \(result)")
+} catch EscapeError.trainMissed {
+    print("❌ Поезд на Париж ушел: билет недействителен!")
+} catch {
+    print("❌ Неожиданная ошибка: \(error)")
+}
+// Выведет: ❌ Поезд на Париж ушел: билет недействителен!
+
+/*
+ ✅ Joanna in Paris! Escape was successful! 🎉
+ ❌ No crowd to blend in
+ ❌ Witness reported the suspect
+ ❌ Train missed
+ ❌ Поезд на Париж ушел: билет недействителен!
+ */
