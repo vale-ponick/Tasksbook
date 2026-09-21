@@ -1020,3 +1020,101 @@ do {
  ❌ Train missed
  ❌ Поезд на Париж ушел: билет недействителен!
  */
+
+// MARK: - '☕️ Конвейер утреннего кофе' - Представь, что мы варим кастомный кофе. У нас есть число — объём напитка в миллилитрах (например, 0). И есть функции-добавки, которые просто прибавляют миллилитры и возвращают новый объём.Твоя задача:Создать массив функций (замыканий). Тип массива должен быть [(Int) -> Int].Внутрь массива положить три шага:Первый добавляет 50 (эспрессо).Второй добавляет 150 (молоко).Третий добавляет 20 (сироп).Прогнать начальный объём 0 через этот массив с помощью reduce.
+
+enum Coffee: Int {
+    case water = 100
+    case groundArabicaCoffeeBeans = 25
+    case milk = 50
+    case suger = 10
+    case syrop = 12
+}
+enum CoffeeError: Error {
+    case cupOverflow(volume: Int) // чашка переполнилась
+    case ingredientShortage(reason: String) // закончился ингредиент
+}
+
+func add(to currentVolume: Int, ingredient: Coffee) throws -> Int {
+    let newVolume = currentVolume + ingredient.rawValue
+    
+    guard newVolume <= 250 else {
+        throw CoffeeError.cupOverflow(volume: newVolume)
+    }
+    guard ingredient.rawValue > 0 else {
+        throw CoffeeError.ingredientShortage(reason: "ingredient is absent")
+    }
+  return newVolume
+}
+let coffeePipeline: [(Int) throws -> Int] = [
+    { try add(to: $0, ingredient: .water) }, // $0 — это объем на входе, к нему добавится 100
+    { try add(to: $0, ingredient: .groundArabicaCoffeeBeans) },
+    { try add(to: $0, ingredient: .milk) },
+    { try add(to: $0, ingredient: .suger) },
+    { try add(to: $0, ingredient: .syrop) }
+]
+// --- СЦЕНАРИЙ 1: Успешное приготовление (старт с 0 мл) ---
+do {
+    let finalVolume = try coffeePipeline.reduce(0) { currentVolume, nextStep in
+        try nextStep(currentVolume)
+    }
+    print("✅ Success! Custom coffee completed: \(finalVolume) мл.")
+
+    print("☕️ Recipe of custom coffee:")
+    print("- Water: \(Coffee.water.rawValue) ml")
+    print("- Milk: \(Coffee.milk.rawValue) ml")
+    print("- Sugar: \(Coffee.suger.rawValue) ml")
+    print("- Syrup: \(Coffee.syrop.rawValue) ml")
+    print("- Coffee Beans: \(Coffee.groundArabicaCoffeeBeans.rawValue) g")
+
+} catch CoffeeError.cupOverflow(let volume) {
+    print("❌ Ups! Чашка переполнилась! Объём \(volume) мл превысил лимит!")
+} catch CoffeeError.ingredientShortage(let reason) {
+    print("❌ Ingredient shortage: \(reason)")
+} catch {
+    print("❌ Uncnown error: \(error)")
+}
+    
+// --- СЦЕНАРИЙ 2: Переполнение (старт со 150 мл) ---
+let maxVolume = 250
+
+let initialTuple = (volume: 150, isFinished: false) // Начальное состояние: (объем: 150, завершено: false)
+
+let finalState = coffeePipeline.reduce(initialTuple) { state, nextStep in
+    // Если на прошлых шагах мы уже решили остановиться, просто прокидываем состояние дальше
+    guard !state.isFinished else { return state }
+    
+    do {
+        let nextVolume = try nextStep(state.volume)
+        
+        // Ваше условие: если объем достиг или превысил максимум
+        if nextVolume >= maxVolume {
+            print("🚨 Превышен лимит (\(nextVolume) мл >= \(maxVolume) мл). Ингредиент удален/отменен.")
+            // Возвращаем ПРЕДЫДУЩИЙ объем и ставим флаг завершения (isFinished: true)
+            return (volume: state.volume, isFinished: true)
+        }
+        
+        // Если все отлично, обновляем объем
+        return (volume: nextVolume, isFinished: false)
+        
+    } catch CoffeeError.cupOverflow {
+        print("🚨 Сработало исключение переполнения. Отмена шага.")
+        return (volume: state.volume, isFinished: true)
+    } catch {
+        return (volume: state.volume, isFinished: true)
+    }
+}
+
+print("✅ Итоговый Swifty-объем: \(finalState.volume) мл.")
+
+/*
+ ✅ Success! Custom coffee completed: 197 мл.
+ ☕️ Recipe of custom coffee:
+ - Water: 100 ml
+ - Milk: 50 ml
+ - Sugar: 10 ml
+ - Syrup: 12 ml
+ - Coffee Beans: 25 g
+ 🚨 Превышен лимит (250 мл >= 250 мл). Ингредиент удален/отменен.
+ ✅ Итоговый Swifty-объем: 150 мл.
+ */
